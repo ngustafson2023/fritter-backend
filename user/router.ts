@@ -34,6 +34,7 @@ router.post(
       req.body.username, req.body.password
     );
     req.session.userId = user._id.toString();
+    req.session.startTime = new Date();
     res.status(201).json({
       message: 'You have logged in successfully',
       user: util.constructUserResponse(user)
@@ -57,6 +58,7 @@ router.delete(
   ],
   (req: Request, res: Response) => {
     req.session.userId = undefined;
+    req.session.startTime = undefined;
     res.status(200).json({
       message: 'You have been logged out successfully.'
     });
@@ -87,6 +89,7 @@ router.post(
   async (req: Request, res: Response) => {
     const user = await UserCollection.addOne(req.body.username, req.body.password);
     req.session.userId = user._id.toString();
+    req.session.startTime = new Date();
     res.status(201).json({
       message: `Your account was created successfully. You have been logged in as ${user.username}`,
       user: util.constructUserResponse(user)
@@ -142,6 +145,7 @@ router.delete(
     await UserCollection.deleteOne(userId);
     await FreetCollection.deleteMany(userId);
     req.session.userId = undefined;
+    req.session.startTime = undefined;
     res.status(200).json({
       message: 'Your account has been deleted successfully.'
     });

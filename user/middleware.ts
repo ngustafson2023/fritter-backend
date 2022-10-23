@@ -60,6 +60,30 @@ const isValidPassword = (req: Request, res: Response, next: NextFunction) => {
 };
 
 /**
+ * Checks if the content of the freet in req.body is valid, i.e not a stream of empty
+ * spaces and not more than 140 characters
+ */
+ const isValidFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const {following} = req.body as {following: string};
+  if (!following.trim()) {
+    res.status(400).json({
+      error: 'Provided following username must be nonempty.'
+    });
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(following.trim());
+  if (!user) {
+    res.status(404).json({
+      error: `A user with username ${following.trim()} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
  * Checks if a user with username and password in req.body exists
  */
 const isAccountExists = async (req: Request, res: Response, next: NextFunction) => {
@@ -153,6 +177,28 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+/**
+ * Checks if a user with userId as follower id in req.query exists
+ */
+ const isFollowerExists = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.query.follower) {
+    res.status(400).json({
+      error: 'Provided follower username must be nonempty.'
+    });
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(req.query.follower as string);
+  if (!user) {
+    res.status(404).json({
+      error: `A user with username ${req.query.follower as string} does not exist.`
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -160,6 +206,8 @@ export {
   isUsernameNotAlreadyInUse,
   isAccountExists,
   isAuthorExists,
+  isFollowerExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
+  isValidFollowing
 };
