@@ -15,18 +15,19 @@ class FollowCollection {
    * Add a Follow to the collection
    *
    * @param {string} followerId - The id of the follower
-   * @param {string} followingId - The id of the user they are following
+   * @param {string} followingUsername - The username of the user they are following
    * @return {Promise<HydratedDocument<Freet>>} - The newly created freet
    */
-  static async addOne(followerId: Types.ObjectId | string, followingId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
+  static async addOne(followerId: Types.ObjectId | string, followingUsername: string): Promise<HydratedDocument<Follow>> {
     const dateCreated = new Date();
-    const freet = new FollowModel({
+    const followingId = await UserCollection.findOneByUsername(followingUsername);
+    const follow = new FollowModel({
         followerId,
         followingId,
         dateCreated
     });
-    await freet.save(); // Saves freet to MongoDB
-    return freet.populate('authorId');
+    await follow.save(); // Saves freet to MongoDB
+    return (await follow.populate('followerId')).populate('followingId');
   }
 
   /**
@@ -37,6 +38,17 @@ class FollowCollection {
    */
   static async findOne(followId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
     return FollowModel.findOne({_id: followId}).populate('followerId').populate('followingId');
+  }
+
+  /**
+   * Find a Follow object by follower and following Ids
+   * 
+   * @param followerId 
+   * @param followingId 
+   * @returns 
+   */
+   static async findOneByIds(followerId: Types.ObjectId | string, followingId: Types.ObjectId | string): Promise<HydratedDocument<Follow>> {
+    return FollowModel.findOne({followerId: followerId, followingId: followingId}).populate('followerId').populate('followingId');
   }
 
   /**
@@ -69,6 +81,20 @@ class FollowCollection {
   static async deleteOne(followId: Types.ObjectId | string): Promise<boolean> {
     const freet = await FollowModel.deleteOne({_id: followId});
     return freet !== null;
+  }
+
+  /**
+   * Delete a Follow with given follower Id and following username
+   *
+   * @param {string} followerId - The Id of the follower
+   * @param {string} followingUsername - The username of user they are following
+   * @return {Promise<Boolean>} - true if the Follow has been deleted, false otherwise
+   */
+   static async deleteByUsernames(followerId: Types.ObjectId | string, followingUsername: string): Promise<boolean> {
+    const followingId = (await UserCollection.findOneByUsername(followingUsername))._id;
+    const follow = await this.findOneByIds(followerId, followingId);
+    const deletion = await FollowModel.deleteOne({_id: follow._id});
+    return deletion !== null;
   }
 
   /**

@@ -15,22 +15,21 @@ const router = express.Router();
  * @return {FollowResponse[]} - A list of all the Follows sorted in descending
  *                      order by date created
  */
-
 /**
- * Get Follows by user.
+ * Get all Follows for a given user.
  *
- * @name GET /api/follows?followerId=id
+ * @name GET /api/follows?username=id
  *
- * @return {FollowResponse[]} - An array of Follows created by user with followerId
- * @throws {400} - If followerId is not given
- * @throws {404} - If no user has given followerId
+ * @return {FollowResponse[]} - An array of Follows created by user with username id
+ * @throws {400} - If username is not given
+ * @throws {404} - If no user has given username
  *
  */
  router.get(
     '/',
     async (req: Request, res: Response, next: NextFunction) => {
-      // Check if followerId query parameter was supplied
-      if (req.query.follower !== undefined) {
+      // Check if username query parameter was supplied
+      if (req.query.username !== undefined) {
         next();
         return;
       }
@@ -40,11 +39,11 @@ const router = express.Router();
       res.status(200).json(response);
     },
     [
-      userValidator.isFollowerExists
+      userValidator.isUserExists
     ],
     async (req: Request, res: Response) => {
-      const followerFreets = await FollowCollection.findAllByUsername(req.query.follower as string);
-      const response = followerFreets.map(util.constructFollowResponse);
+      const userFollows = await FollowCollection.findAllByUsername(req.query.username as string);
+      const response = userFollows.map(util.constructFollowResponse);
       res.status(200).json(response);
     }
   );
@@ -52,22 +51,23 @@ const router = express.Router();
   /**
    * Create a new Follow.
    *
-   * @name POST /api/follows
+   * @name POST /api/follows/:username
    *
-   * @param {string} following - The username of the user being followed
    * @return {FollowResponse} - The created Follow
    * @throws {403} - If the user is not logged in
-   * @throws {404} - If no user has given followingId
+   * @throws {403} - If the Follow already exists
+   * @throws {404} - If no user has given username
    */
   router.post(
-    '/',
+    '/:username',
     [
       userValidator.isUserLoggedIn,
-      userValidator.isValidFollowing
+      userValidator.isValidFollowing,
+      followValidator.isFollowAlreadyExists
     ],
     async (req: Request, res: Response) => {
       const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-      const follow = await FollowCollection.addOne(userId, req.body.following);
+      const follow = await FollowCollection.addOne(userId, req.params.username);
   
       res.status(201).json({
         message: 'Your Follow was created successfully.',
@@ -79,22 +79,23 @@ const router = express.Router();
   /**
    * Delete a Follow
    *
-   * @name DELETE /api/follows/:id
+   * @name DELETE /api/follows/:username
    *
    * @return {string} - A success message
-   * @throws {403} - If the user is not logged in or is not the creator of
-   *                 the Follow
-   * @throws {404} - If the followId is not valid
+   * @throws {403} - If the user is not logged in
+   * @throws {404} - If the Follow does not exist
    */
   router.delete(
-    '/:followId?',
+    '/:username',
     [
       userValidator.isUserLoggedIn,
-      followValidator.isFollowExists,
-      followValidator.isValidFollowModifier
+      userValidator.isValidFollowing,
+      followValidator.isFollowNotExists
     ],
     async (req: Request, res: Response) => {
-      await FollowCollection.deleteOne(req.params.followId);
+      const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+      await FollowCollection.deleteByUsernames(userId, req.params.username);
+      
       res.status(200).json({
         message: 'Your Follow was deleted successfully.'
       });
