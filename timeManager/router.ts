@@ -92,6 +92,7 @@ router.post(
     '/:username?',
     [
       userValidator.isUserLoggedIn,
+      userValidator.isUsernameExists,
       timeManagerValidator.isValidTimeManagerModifier
     ],
     async (req: Request, res: Response) => {
