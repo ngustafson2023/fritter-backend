@@ -11,20 +11,14 @@ function viewAllFreets(fields) {
     .catch(showResponse);
 }
 
-function viewFreetsByAuthor(fields) {
-  fetch(`/api/freets?author=${fields.author}`)
+function viewFreetsByUser(fields) {
+  fetch(`/api/freets?username=${fields.username}`)
     .then(showResponse)
     .catch(showResponse);
 }
 
 function createFreet(fields) {
   fetch('/api/freets', {method: 'POST', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
-    .then(showResponse)
-    .catch(showResponse);
-}
-
-function editFreet(fields) {
-  fetch(`/api/freets/${fields.id}`, {method: 'PUT', body: JSON.stringify(fields), headers: {'Content-Type': 'application/json'}})
     .then(showResponse)
     .catch(showResponse);
 }

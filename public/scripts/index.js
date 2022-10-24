@@ -35,9 +35,8 @@ const formsAndHandlers = {
   'sign-in': signIn,
   'sign-out': signOut,
   'view-all-freets': viewAllFreets,
-  'view-freets-by-author': viewFreetsByAuthor,
+  'view-freets-by-user': viewFreetsByUser,
   'create-freet': createFreet,
-  'edit-freet': editFreet,
   'delete-freet': deleteFreet
 };
 
