@@ -42,6 +42,7 @@ const formsAndHandlers = {
   'view-follows-by-user': viewFollowsByUser,
   'follow-user': followUser,
   'unfollow-user': unfollowUser,
+  'view-timeManager': viewTimeManager,
   'create-timeManager': createTimeManager,
   'delete-timeManager': deleteTimeManager,
   'modify-timeManager': modifyTimeManager

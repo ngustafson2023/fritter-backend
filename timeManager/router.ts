@@ -8,41 +8,31 @@ import * as util from './util';
 const router = express.Router();
 
 /**
- * Modify a Time Manager.
+ * View the Time Manager for the current user.
  *
- * @name PUT /api/timemanagers
+ * @name GET /api/timemanager
  *
- * @param {string} milestone
- * @param {string} timeLimit
- * @return {TimeManagerResponse} - The created Time Manager
- * @throws {403} - If the user is not logged in
- * @throws {400} - If milestone or time limit is non-numeric
+ * @return {TimeManagerResponse} - The user's Time Manager
+ * @throws {403} - If the user is not logged in or time manager does not exist
  */
- router.put(
+ router.get(
   '/',
   [
     userValidator.isUserLoggedIn,
-    timeManagerValidator.isNumericMilestone,
-    timeManagerValidator.isNumericTimeLimit,
     timeManagerValidator.isTimeManagerNotExists
-
   ],
   async (req: Request, res: Response) => {
     const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
-    const timeManager = await TimeManagerCollection.updateOne(userId, req.body);
+    const timeManager = await TimeManagerCollection.findByUserId(userId);
 
-    res.status(201).json({
-      message: 'Your Time Manager was modified successfully.',
-      timeManager: util.constructTimeManagerResponse(timeManager)
-    });
+    res.status(200).json(util.constructTimeManagerResponse(timeManager));
   }
 );
-
 
 /**
  * Create a new Time Manager.
  *
- * @name POST /api/timemanagers
+ * @name POST /api/timemanager
  *
  * @param {string} milestone
  * @param {string} timeLimit
@@ -74,9 +64,40 @@ router.post(
 );
 
 /**
+ * Modify a Time Manager.
+ *
+ * @name PUT /api/timemanager
+ *
+ * @param {string} milestone
+ * @param {string} timeLimit
+ * @return {TimeManagerResponse} - The created Time Manager
+ * @throws {403} - If the user is not logged in
+ * @throws {400} - If milestone or time limit is non-numeric
+ */
+ router.put(
+  '/',
+  [
+    userValidator.isUserLoggedIn,
+    timeManagerValidator.isNumericMilestone,
+    timeManagerValidator.isNumericTimeLimit,
+    timeManagerValidator.isTimeManagerNotExists
+
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const timeManager = await TimeManagerCollection.updateOne(userId, req.body);
+
+    res.status(200).json({
+      message: 'Your Time Manager was modified successfully.',
+      timeManager: util.constructTimeManagerResponse(timeManager)
+    });
+  }
+);
+
+/**
  * Delete the Time Manager for current user 
  *
- * @name DELETE /api/timemanagers
+ * @name DELETE /api/timemanager
  *
  * @return {string} - A success message
  * @throws {403} - If the user is not logged in or no Time Manager exists
