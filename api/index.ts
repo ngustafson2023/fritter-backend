@@ -12,7 +12,7 @@ import * as userValidator from '../user/middleware';
 import {userRouter} from '../user/router';
 import {freetRouter} from '../freet/router';
 import {followRouter} from '../follow/router';
-//import {timeManagerRouter} from '../timeManager/router';
+import {timeManagerRouter} from '../timeManager/router';
 //import {feedRouter} from '../feed/router';
 
 
@@ -81,7 +81,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/users', userRouter);
 app.use('/api/freets', freetRouter);
 app.use('/api/follows', followRouter);
-//app.use('api/timemanagers', timeManagerRouter);
+app.use('/api/timemanagers', timeManagerRouter);
 //app.use('api/feeds', feedRouter);
 
 // Catch all the other routes and display error message

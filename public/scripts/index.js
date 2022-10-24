@@ -41,7 +41,10 @@ const formsAndHandlers = {
   'view-all-follows': viewAllFollows,
   'view-follows-by-user': viewFollowsByUser,
   'follow-user': followUser,
-  'unfollow-user': unfollowUser
+  'unfollow-user': unfollowUser,
+  'create-timeManager': createTimeManager,
+  'delete-timeManager': deleteTimeManager,
+  'modify-timeManager': modifyTimeManager
 };
 
 // Attach handlers to forms

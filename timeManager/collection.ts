@@ -29,6 +29,26 @@ import UserCollection from '../user/collection';
     }
 
     /**
+     * Modify a TimeManager
+     *
+     * @param {string} userId - The id of the user
+     * @param {Object} timeManagerDetails - An object with the user's updated preferences
+     * @return {Promise<HydratedDocument<TimeManager>>} - The newly modified TimeManager
+     */
+     static async updateOne(userId: Types.ObjectId | string, timeManagerDetails: any): Promise<HydratedDocument<TimeManager>> {
+        const timeManager = await TimeManagerCollection.findByUserId(userId);
+        if (timeManagerDetails.milestone) {
+            timeManager.milestone = parseInt(timeManagerDetails.milestone);
+        }
+        if (timeManagerDetails.timeLimit) {
+            timeManager.timeLimit = parseInt(timeManagerDetails.timeLimit);
+        }
+        await timeManager.save(); // Saves freet to MongoDB
+        return timeManager.populate('userId');
+    }
+
+
+    /**
      * Find a TimeManager by timeManagerId
      *
      * @param {string} timeManagerId - The id of the TimeManager to find
@@ -36,6 +56,16 @@ import UserCollection from '../user/collection';
      */
     static async findOne(timeManagerId: Types.ObjectId | string): Promise<HydratedDocument<TimeManager>> {
         return TimeManagerModel.findOne({_id: timeManagerId}).populate('userId');
+    }
+
+    /**
+     * Find a TimeManager by userId
+     *
+     * @param {string} userId - The userId of the TimeManager to find
+     * @return {Promise<HydratedDocument<TimeManager>> | Promise<null> } - The freet with the given freetId, if any
+     */
+     static async findByUserId(userId: Types.ObjectId | string): Promise<HydratedDocument<TimeManager>> {
+        return TimeManagerModel.findOne({userId: userId}).populate('userId');
     }
 
     /**
@@ -68,9 +98,18 @@ import UserCollection from '../user/collection';
         const timeManager = await TimeManagerModel.deleteOne({_id: timeManagerId});
         return timeManager !== null;
     }
+
+    /**
+     * Delete the Time Manager of a given user by userId
+     *
+     * @param {string} userId - The id of user
+     */
+     static async deleteById(userId: Types.ObjectId | string): Promise<void> {
+        await TimeManagerModel.deleteOne({userId: userId});
+    }
     
     /**
-     * Delete the Time Manager of a given user
+     * Delete the Time Manager of a given user by username
      *
      * @param {string} username - The username of user
      */

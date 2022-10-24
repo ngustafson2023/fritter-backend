@@ -8,44 +8,36 @@ import * as util from './util';
 const router = express.Router();
 
 /**
- * Get all the Time Managers
+ * Modify a Time Manager.
  *
- * @name GET /api/timemanagers
+ * @name PUT /api/timemanagers
  *
- * @return {TimeManagerResponse[]} - A list of all the Time Managers
+ * @param {string} milestone
+ * @param {string} timeLimit
+ * @return {TimeManagerResponse} - The created Time Manager
+ * @throws {403} - If the user is not logged in
+ * @throws {400} - If milestone or time limit is non-numeric
  */
-/**
- * Get a Time Manager by user
- *
- * @name GET /api/timemanagers?username=id
- *
- * @return {TimeManagerResponse} 
- * @throws {400} - If username is not given
- * @throws {404} - If no user has given username
- *
- */
-router.get(
-    '/',
-    async (req: Request, res: Response, next: NextFunction) => {
-      // Check if username query parameter was supplied
-      if (req.query.username !== undefined) {
-        next();
-        return;
-      }
-  
-      const allTimeManagers = await TimeManagerCollection.findAll();
-      const response = allTimeManagers.map(util.constructTimeManagerResponse);
-      res.status(200).json(response);
-    },
-    [
-      userValidator.isUsernameExists
-    ],
-    async (req: Request, res: Response) => {
-      const timeManager = await TimeManagerCollection.findByUsername(req.query.username as string);
-      const response = util.constructTimeManagerResponse(timeManager);
-      res.status(200).json(response);
-    }
+ router.put(
+  '/',
+  [
+    userValidator.isUserLoggedIn,
+    timeManagerValidator.isNumericMilestone,
+    timeManagerValidator.isNumericTimeLimit,
+    timeManagerValidator.isTimeManagerNotExists
+
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const timeManager = await TimeManagerCollection.updateOne(userId, req.body);
+
+    res.status(201).json({
+      message: 'Your Time Manager was modified successfully.',
+      timeManager: util.constructTimeManagerResponse(timeManager)
+    });
+  }
 );
+
 
 /**
  * Create a new Time Manager.
@@ -63,8 +55,11 @@ router.post(
     '/',
     [
       userValidator.isUserLoggedIn,
-      timeManagerValidator.isValidMilestone,
-      timeManagerValidator.isValidTimeLimit
+      timeManagerValidator.isEmptyMilestone,
+      timeManagerValidator.isEmptyTimeLimit,
+      timeManagerValidator.isNumericMilestone,
+      timeManagerValidator.isNumericTimeLimit,
+      timeManagerValidator.isTimeManagerAlreadyExists
 
     ],
     async (req: Request, res: Response) => {
@@ -79,24 +74,21 @@ router.post(
 );
 
 /**
- * Delete the Time Manager for given user 
+ * Delete the Time Manager for current user 
  *
- * @name DELETE /api/timemanagers/:username
+ * @name DELETE /api/timemanagers
  *
  * @return {string} - A success message
- * @throws {403} - If the user is not logged in or is not the creator of
- *                 the Time Manager
- * @throws {404} - If the username is not valid
+ * @throws {403} - If the user is not logged in or no Time Manager exists
  */
  router.delete(
-    '/:username?',
+    '/',
     [
       userValidator.isUserLoggedIn,
-      userValidator.isUsernameExists,
-      timeManagerValidator.isValidTimeManagerModifier
+      timeManagerValidator.isTimeManagerNotExists
     ],
     async (req: Request, res: Response) => {
-      await TimeManagerCollection.deleteByUsername(req.params.username);
+      await TimeManagerCollection.deleteById(req.session.userId);
       res.status(200).json({
         message: 'Your Time Manager was deleted successfully.'
       });

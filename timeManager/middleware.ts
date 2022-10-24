@@ -3,14 +3,42 @@ import {Types} from 'mongoose';
 import TimeManagerCollection from './collection';
 
 /**
- * Checks if the milestone is a non-zero number
+ * Checks if the milestone is empty
  */
-const isValidMilestone = (req: Request, res: Response, next: NextFunction) => {
-    const {milestone} = req.body as {milestone: string};
+ const isEmptyMilestone = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.milestone) {
+    res.status(400).json({
+      error: 'Milestone must be nonempty.'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if the time limit is empty
+ */
+ const isEmptyTimeLimit = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.timeLimit) {
+    res.status(400).json({
+      error: 'Time Limit must be nonempty.'
+    });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Checks if the milestone is numeric
+ */
+const isNumericMilestone = (req: Request, res: Response, next: NextFunction) => {
+    const milestone = req.body.milestone as string;
     const parsedMilestone = parseInt(milestone.trim());
-    if (Number.isNaN(parsedMilestone)) {
+    if (milestone !== '' && Number.isNaN(parsedMilestone)) {
       res.status(400).json({
-        error: 'Milestone must be nonempty and numeric.'
+        error: 'Milestone must be numeric.'
       });
       return;
     }
@@ -19,14 +47,14 @@ const isValidMilestone = (req: Request, res: Response, next: NextFunction) => {
   };
 
 /**
- * Checks if the time limit is a non-zero number
+ * Checks if the time limit is numeric
  */
-const isValidTimeLimit = (req: Request, res: Response, next: NextFunction) => {
-    const {timeLimit} = req.body as {timeLimit: string};
+const isNumericTimeLimit = (req: Request, res: Response, next: NextFunction) => {
+    const timeLimit = req.body.timeLimit as string;
     const parsedTimeLimit = parseInt(timeLimit.trim());
-    if (Number.isNaN(parsedTimeLimit)) {
+    if (timeLimit !== '' && Number.isNaN(parsedTimeLimit)) {
       res.status(400).json({
-        error: 'Time limit must be nonempty and numeric.'
+        error: 'Time limit must be numeric.'
       });
       return;
     }
@@ -35,14 +63,30 @@ const isValidTimeLimit = (req: Request, res: Response, next: NextFunction) => {
   };
 
 /**
- * Checks if the current user is the creator of the Time Manager whose userId is in req.params
+ * Checks if a Time Manager already exists for the current user
  */
- const isValidTimeManagerModifier = async (req: Request, res: Response, next: NextFunction) => {
-    const timeManager = await TimeManagerCollection.findByUsername(req.params.username);
-    const userId = timeManager.userId._id;
-    if (req.session.userId !== userId.toString()) {
+ const isTimeManagerAlreadyExists = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.session.userId;
+    const timeManager = await TimeManagerCollection.findByUserId(userId);
+    if (timeManager) {
       res.status(403).json({
-        error: 'Cannot modify other users\' Time Manager.'
+        error: 'Time Manager already exists.'
+      });
+      return;
+    }
+  
+    next();
+  };
+
+/**
+ * Checks if Time Manager does not exist for the current user
+ */
+ const isTimeManagerNotExists = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.session.userId;
+    const timeManager = await TimeManagerCollection.findByUserId(userId);
+    if (!timeManager) {
+      res.status(403).json({
+        error: 'Time Manager does not exist.'
       });
       return;
     }
@@ -51,8 +95,11 @@ const isValidTimeLimit = (req: Request, res: Response, next: NextFunction) => {
   };
   
   export {
-    isValidMilestone,
-    isValidTimeLimit,
-    isValidTimeManagerModifier
+    isEmptyMilestone,
+    isEmptyTimeLimit,
+    isNumericMilestone,
+    isNumericTimeLimit,
+    isTimeManagerAlreadyExists,
+    isTimeManagerNotExists
   };
   
