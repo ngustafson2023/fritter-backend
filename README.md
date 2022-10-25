@@ -181,16 +181,16 @@ This renders the `index.html` file that will be used to interact with the backen
 
 - An array of all freets sorted in descending order by date modified
 
-#### `GET /api/freets?author=USERNAME` - Get freets by author
+#### `GET /api/freets?username=AUTHOR` - Get freets by author
 
 **Returns**
 
-- An array of freets created by user with username `author`
+- An array of freets created by user with username `AUTHOR`
 
 **Throws**
 
-- `400` if `author` is not given
-- `404` if `author` is not a recognized username of any user
+- `400` if `AUTHOR` is not given
+- `404` if `AUTHOR` is not a recognized username of any user
 
 #### `POST /api/freets` - Create a new freet
 
@@ -220,25 +220,6 @@ This renders the `index.html` file that will be used to interact with the backen
 - `403` if the user is not logged in
 - `403` if the user is not the author of the freet
 - `404` if the freetId is invalid
-
-#### `PUT /api/freets/:freetId?` - Update an existing freet
-
-**Body**
-
-- `content` _{string}_ - The new content of the freet
-
-**Returns**
-
-- A success message
-- An object with the updated freet
-
-**Throws**
-
-- `403` if the user is not logged in
-- `404` if the freetId is invalid
-- `403` if the user is not the author of the freet
-- `400` if the new freet content is empty or a stream of empty spaces
-- `413` if the new freet content is more than 140 characters long
 
 #### `POST /api/users/session` - Sign in user
 
@@ -313,3 +294,154 @@ This renders the `index.html` file that will be used to interact with the backen
 **Throws**
 
 - `403` if the user is not logged in
+
+#### `GET /api/follows` - Get all of the follows
+
+**Returns**
+
+- An array of all of the follows
+
+#### `GET /api/follows?username=USERNAME` - Get all Follows for a given user
+
+**Returns**
+
+- An array of follows by user with username `USERNAME`
+
+**Throws**
+
+- `400` if username is not given
+- `404` if no user has given username
+
+#### `POST /api/follows/:username` - Create a new follow of user with username `username` by the current user
+
+**Returns**
+
+- The created follow
+
+**Throws**
+
+- `403` if the user is not logged in or the Follow already exists
+- `404` if no user has given username
+
+#### `DELETE /api/follows/:username` - Delete the follow of user with username `username` by the current user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in
+- `404` if the Follow does not exist
+
+#### `GET /api/timemanager` - View the Time Manager for the current user
+
+**Returns** 
+
+- The user's Time Manager
+
+**Throws**
+
+- `403` if the user is not logged in or time manager does not exist
+
+#### `GET /api/timemanager` - View the Time Manager for the current user
+
+**Returns**
+
+- The user's Time Manager
+
+**Throws**
+
+- `403` if the user is not logged in or time manager does not exist
+
+#### `POST /api/timemanager` - Create a new Time Manager for the current user
+
+**Body**
+
+- `milestone` _{string}_ - the user's preferred milestone
+- `timeLimit` _{string}_ - the user's preferred time limit
+
+**Returns**
+
+- The created Time Manager
+
+**Throws** 
+
+- `403` if the user is not logged in
+- `400` if the milestone or time limit is empty or non-numeric
+
+#### `PUT /api/timemanager` - Modify a Time Manager
+
+**Body**
+
+- `milestone` _{string}_ - the user's new preferred milestone
+- `timeLimit` _{string}_ - the user's new preferred time limit
+
+**Returns**
+
+- The created Time Manager
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` if the milestone or time limit is non-numeric
+
+#### `DELETE /api/timemanager` - Delete the Time Manager for current user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in or no Time Manager exists
+
+#### `GET /api/feed` - Get the Feed for the current user
+
+**Returns** 
+
+- The user's feed
+
+**Throws**
+
+- `403` if user not logged in or Feed does not exist
+
+#### `POST /api/feed` - Create a new Feed for current user
+
+**Body**
+
+- `isRecommendedEnabled` _{string}_ Whether recommended content is allowed in Feed (true or false)
+
+**Returns**
+
+- The created Feed
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` if `isRecommendedEnabled` is not true or false
+
+#### `PUT /api/feed` - Modify the current user's Feed
+
+**Body**
+
+- `isRecommendedEnabled` _{string}_ Whether recommended content is allowed in Feed (true or false)
+
+**Returns**
+
+- The modified Feed
+
+**Throws**
+
+- `403` if the user is not logged in
+- `400` if `isRecommendedEnabled` is not true or false
+
+#### `DELETE /api/feed` - Delete the Feed of the current user
+
+**Returns**
+
+- A success message
+
+**Throws**
+
+- `403` if the user is not logged in or feed does not exist
