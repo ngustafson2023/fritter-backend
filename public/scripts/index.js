@@ -45,7 +45,11 @@ const formsAndHandlers = {
   'view-timeManager': viewTimeManager,
   'create-timeManager': createTimeManager,
   'delete-timeManager': deleteTimeManager,
-  'modify-timeManager': modifyTimeManager
+  'modify-timeManager': modifyTimeManager,
+  'view-feed': viewFeed,
+  'create-feed': createFeed,
+  'delete-feed': deleteFeed,
+  'modify-feed': modifyFeed
 };
 
 // Attach handlers to forms

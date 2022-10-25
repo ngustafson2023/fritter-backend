@@ -3,14 +3,14 @@ import {Types} from 'mongoose';
 import FeedCollection from './collection';
 
 /**
- * Checks if the current user is the creator of the Feed whose userId is in req.params
+ * Checks if Feed does not exist for the current user
  */
- const isValidFeedModifier = async (req: Request, res: Response, next: NextFunction) => {
-    const feed = await FeedCollection.findByUsername(req.params.username);
-    const userId = feed.userId._id;
-    if (req.session.userId !== userId.toString()) {
+ const isFeedNotExists = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.session.userId;
+    const feed = await FeedCollection.findByUserId(userId);
+    if (!feed) {
       res.status(403).json({
-        error: 'Cannot modify other users\' Feed.'
+        error: 'Feed does not exist.'
       });
       return;
     }
@@ -18,6 +18,36 @@ import FeedCollection from './collection';
     next();
   };
 
-  export {
-    isValidFeedModifier
-  };
+/**
+ * Checks if Feed does not exist for the current user
+ */
+ const isFeedAlreadyExists = async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.session.userId;
+  const feed = await FeedCollection.findByUserId(userId);
+  if (feed) {
+    res.status(403).json({
+      error: 'Feed already exists.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isValidRecommendedEnabled = (req: Request, res: Response, next: NextFunction) => {
+  const isRecommendedEnabled = req.body.isRecommendedEnabled;
+  if (isRecommendedEnabled !== 'true' && isRecommendedEnabled !== 'false') {
+    res.status(400).json({
+      error: 'isRecommendedEnabled must be true or false.'
+    });
+    return;
+  }
+
+  next();
+};
+
+export {
+  isFeedNotExists,
+  isFeedAlreadyExists,
+  isValidRecommendedEnabled
+};

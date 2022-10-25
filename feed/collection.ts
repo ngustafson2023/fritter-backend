@@ -28,6 +28,26 @@ class FeedCollection {
   }
 
   /**
+   * Modify a Feed
+   *
+   * @param {string} userId - The id of the user
+   * @param {Object} feedDetails - An object with the user's updated preferences
+   * @return {Promise<HydratedDocument<TimeManager>>} - The newly modified TimeManager
+   */
+  static async updateOne(userId: Types.ObjectId | string, feedDetails: any): Promise<HydratedDocument<Feed>> {
+    const isRecommendedEnabled = feedDetails.isRecommendedEnabled;
+    const feed = await FeedCollection.findByUserId(userId);
+    if (isRecommendedEnabled === 'true') {
+      feed.isRecommendedEnabled = true;
+    } else {  // isRecommendedEnabled === 'false'
+      feed.isRecommendedEnabled = false;
+    }
+    
+    await feed.save(); // Saves freet to MongoDB
+    return feed.populate('userId');
+  }
+
+  /**
    * Find a Feed by feedId
    *
    * @param {string} feedId - The id of the Feed to find
@@ -58,6 +78,16 @@ class FeedCollection {
   }
 
   /**
+   * Find a Feed by userId
+   *
+   * @param {string} userId - The userId of the Feed to find
+   * @return {Promise<HydratedDocument<Feed>> | Promise<null> } - The Feed with the given userId, if any
+   */
+  static async findByUserId(userId: Types.ObjectId | string): Promise<HydratedDocument<Feed>> {
+    return FeedModel.findOne({userId: userId}).populate('userId');
+}
+
+  /**
    * Delete a Feed with given feedId
    *
    * @param {string} feedId - The feedId of Feed to delete
@@ -65,6 +95,16 @@ class FeedCollection {
    */
   static async deleteOne(feedId: Types.ObjectId | string): Promise<boolean> {
     const feed = await FeedModel.deleteOne({_id: feedId});
+    return feed !== null;
+  }
+
+  /**
+   * Delete the Feed of the user with id userId
+   * @param {string} userId - The id of the user 
+   * @returns {Promise<boolean>} - true if the Feed has been deleted, false otherwise
+   */
+  static async deleteById(userId: Types.ObjectId | string): Promise<boolean> {
+    const feed = await FeedModel.deleteOne({userId: userId});
     return feed !== null;
   }
 

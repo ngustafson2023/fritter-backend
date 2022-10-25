@@ -62,7 +62,7 @@ import UserCollection from '../user/collection';
      * Find a TimeManager by userId
      *
      * @param {string} userId - The userId of the TimeManager to find
-     * @return {Promise<HydratedDocument<TimeManager>> | Promise<null> } - The freet with the given freetId, if any
+     * @return {Promise<HydratedDocument<TimeManager>> | Promise<null> } - The TimeManager with the given userId, if any
      */
      static async findByUserId(userId: Types.ObjectId | string): Promise<HydratedDocument<TimeManager>> {
         return TimeManagerModel.findOne({userId: userId}).populate('userId');

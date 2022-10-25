@@ -5,6 +5,7 @@
   <meta name="author" content="6.170 Staff">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="/scripts/feed.js"></script>
   <script src="/scripts/timeManager.js"></script>
   <script src="/scripts/follow.js"></script>
   <script src="/scripts/freet.js"></script>
@@ -176,7 +177,34 @@
           <input type="submit" value="Delete Time Manager">
         </form>
       <!-- Feed -->
-        
+      <form id="create-feed">
+        <h3>Create Feed</h3>
+        <div>
+          <label for="isRecommendedEnabled">Enable Recommended Content:</label>
+          <input id="isRecommendedEnabled" name="isRecommendedEnabled">
+        </div>
+        <input type="submit" value="Create Feed">
+      </form>
+
+      <form id="modify-feed">
+        <h3>Modify Feed</h3>
+        <div>
+          <label for="isRecommendedEnabled">Enable Recommended Content:</label>
+          <input id="isRecommendedEnabled" name="isRecommendedEnabled">
+        </div>
+        <input type="submit" value="Modify Feed">
+      </form>
+
+      <form id="view-feed">
+        <h3>View Feed</h3>
+        <input type="submit" value="View Feed">
+      </form>
+
+      <form id="delete-feed">
+        <h3>Delete Feed</h3>
+        <input type="submit" value="Delete Feed">
+      </form>
+
       </div>
     </section>
     <section>

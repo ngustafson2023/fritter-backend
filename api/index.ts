@@ -82,7 +82,7 @@ app.use('/api/users', userRouter);
 app.use('/api/freets', freetRouter);
 app.use('/api/follows', followRouter);
 app.use('/api/timemanager', timeManagerRouter);
-app.use('api/feeds', feedRouter);
+app.use('/api/feed', feedRouter);
 
 // Catch all the other routes and display error message
 app.all('*', (req: Request, res: Response) => {
